@@ -1,0 +1,24 @@
+{
+  "name": "ionut",
+  "version": "0.0.1",
+  "description": "",
+  "author": "morion4000",
+  "dependencies": {
+    "async": "^2.6.1",
+    "axios": "^0.19.2",
+    "cheerio": "^0.22.0",
+    "cli": "^1.0.1",
+    "events": "^2.0.0",
+    "express": "^4.16.4",
+    "influxdb-nodejs": "^2.7.6",
+    "mailgun-js": "^0.22.0",
+    "node-telegram-bot-api": "^0.30.0",
+    "request": "^2.87.0",
+    "scp2": "^0.5.0",
+    "socket.io": "1.7.4",
+    "socket.io-client": "1.7.4",
+    "socketio-wildcard": "^2.0.0",
+    "twilio": "^3.48.2",
+    "underscore": "^1.9.0"
+  }
+}
