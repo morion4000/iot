@@ -1,14 +1,12 @@
 var http = require('http');
 var url = require('url');
 var Influx = require('influxdb-nodejs');
+
 var client = new Influx(process.env.INFLUXDB_URL);
-
 var port = process.env.PORT || 8080;
-
 var fieldSchema = {
   value: 'i',
 };
-
 var tagSchema = {
   sensor: '*',
   parameter: '*',
