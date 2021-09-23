@@ -14,7 +14,7 @@ var tagSchema = {
   parameter: '*',
 };
 
-client.schema('sensors3', fieldSchema, tagSchema, {
+client.schema('air_quality', fieldSchema, tagSchema, {
   // default is false
   stripUnknown: true,
 });
@@ -35,7 +35,7 @@ http.createServer(function (req, res) {
   console.log(q);
 
   if (q.temperature) {
-    client.write('sensors3')
+    client.write('air_quality')
       .tag({
         sensor: 'DH11',
         parameter: 'temperature'
@@ -48,7 +48,7 @@ http.createServer(function (req, res) {
   }
 
   if (q.humidity) {
-    client.write('sensors3')
+    client.write('air_quality')
       .tag({
         sensor: 'DH11',
         parameter: 'humidity'
@@ -63,3 +63,5 @@ http.createServer(function (req, res) {
   res.write('Hello World!');
   res.end();
 }).listen(port);
+
+console.log('ready');
