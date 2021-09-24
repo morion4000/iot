@@ -57,6 +57,32 @@ http.createServer(function (req, res) {
       .then(console.log)
       .catch(console.error);
   }
+  
+  if (q.CO2) {
+    client.write('air_quality')
+      .tag({
+        sensor: 'CCS811',
+        parameter: 'CO2'
+      })
+      .field({
+        value: parseInt(q.CO2),
+      })
+      .then(console.log)
+      .catch(console.error);
+  }
+  
+  if (q.TVOC) {
+    client.write('air_quality')
+      .tag({
+        sensor: 'CCS811',
+        parameter: 'TVOC'
+      })
+      .field({
+        value: parseInt(q.TVOC),
+      })
+      .then(console.log)
+      .catch(console.error);
+  }
 
   res.write('Hello World!');
   res.end();
