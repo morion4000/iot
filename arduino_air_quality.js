@@ -52,6 +52,8 @@ http
         }
       });
     } else {
+      console.log(data);
+
       db.collection("measurements").insertOne(data, (err, result) => {
         if (err) {
           console.log(err);
