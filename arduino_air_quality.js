@@ -1,3 +1,4 @@
+const fs = require("fs");
 const http = require("http");
 const url = require("url");
 const MongoClient = require("mongodb").MongoClient;
@@ -5,7 +6,7 @@ const MongoClient = require("mongodb").MongoClient;
 const port = process.env.PORT || 8080;
 let db;
 
-MongoClient.connect(process.env.MONGDB_URL, { useUnifiedTopology: true })
+MongoClient.connect(process.env.MONGODB_URL, { useUnifiedTopology: true })
   .then((client) => {
     console.log("connected");
 
@@ -23,8 +24,6 @@ http
       measurement: "air_quality",
     };
 
-    console.log(q);
-
     if (q.temperature) {
       data.temperature = parseInt(q.temperature);
     }
@@ -41,14 +40,27 @@ http
       data.TVOC = parseInt(q.TVOC);
     }
 
-    db.collection("measurements").insertOne(data, (err, result) => {
-      if (err) {
-        console.log(err);
-      }
-    });
+    if (Object.keys(q).length === 0) {
+      fs.readFile("./index.html", "utf8", (err, data) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500);
+          res.end("An error occurred while reading the file");
+        } else {
+          res.writeHead(200, { "Content-Type": "text/html" });
+          res.end(data);
+        }
+      });
+    } else {
+      db.collection("measurements").insertOne(data, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+      });
 
-    res.write("Logged");
-    res.end();
+      res.write("Logged");
+      res.end();
+    }
   })
   .listen(port);
 
