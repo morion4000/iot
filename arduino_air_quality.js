@@ -1,91 +1,55 @@
-var http = require('http');
-var url = require('url');
-var Influx = require('influxdb-nodejs');
+const http = require("http");
+const url = require("url");
+const MongoClient = require("mongodb").MongoClient;
 
-var client = new Influx(process.env.INFLUXDB_URL);
-var port = process.env.PORT || 8080;
-var fieldSchema = {
-  value: 'i',
-};
-var tagSchema = {
-  sensor: '*',
-  parameter: '*',
-};
+const port = process.env.PORT || 8080;
+let db;
 
-client.schema('air_quality', fieldSchema, tagSchema, {
-  // default is false
-  stripUnknown: true,
-});
+MongoClient.connect(process.env.MONGDB_URL, { useUnifiedTopology: true })
+  .then((client) => {
+    console.log("connected");
 
-//client.createDatabase().then(console.log).catch(console.error);return;
-
-/*
-client.query('hashes')
-  .then(function(d) {
-    console.log(d.results[0].series[0])
+    db = client.db("air_quality");
   })
-  .catch(console.error);
-*/
+  .catch((err) => {
+    console.log("Error occurred while connecting to MongoDB Atlas...\n", err);
+  });
 
-http.createServer(function (req, res) {
-  var q = url.parse(req.url, true).query;
+http
+  .createServer(function (req, res) {
+    const q = url.parse(req.url, true).query;
+    const data = {
+      date: new Date(),
+      measurement: "air_quality",
+    };
 
-  console.log(q);
+    console.log(q);
 
-  if (q.temperature) {
-    client.write('air_quality')
-      .tag({
-        sensor: 'DH11',
-        parameter: 'temperature'
-      })
-      .field({
-        value: parseInt(q.temperature),
-      })
-      .then(console.log)
-      .catch(console.error);
-  }
+    if (q.temperature) {
+      data.temperature = parseInt(q.temperature);
+    }
 
-  if (q.humidity) {
-    client.write('air_quality')
-      .tag({
-        sensor: 'DH11',
-        parameter: 'humidity'
-      })
-      .field({
-        value: parseInt(q.humidity),
-      })
-      .then(console.log)
-      .catch(console.error);
-  }
-  
-  if (q.CO2) {
-    client.write('air_quality')
-      .tag({
-        sensor: 'CCS811',
-        parameter: 'CO2'
-      })
-      .field({
-        value: parseInt(q.CO2),
-      })
-      .then(console.log)
-      .catch(console.error);
-  }
-  
-  if (q.TVOC) {
-    client.write('air_quality')
-      .tag({
-        sensor: 'CCS811',
-        parameter: 'TVOC'
-      })
-      .field({
-        value: parseInt(q.TVOC),
-      })
-      .then(console.log)
-      .catch(console.error);
-  }
+    if (q.humidity) {
+      data.humidity = parseInt(q.humidity);
+    }
 
-  res.write('Hello World!');
-  res.end();
-}).listen(port);
+    if (q.CO2) {
+      data.CO2 = parseInt(q.CO2);
+    }
 
-console.log('ready');
+    if (q.TVOC) {
+      data.TVOC = parseInt(q.TVOC);
+    }
+
+    db.collection("measurements").insertOne(data, (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+    });
+
+    res.write("Logged");
+    res.end();
+  })
+  .listen(port);
+
+console.log("ready");
