@@ -2,7 +2,14 @@ const fs = require("fs");
 const http = require("http");
 const url = require("url");
 const MongoClient = require("mongodb").MongoClient;
+const mailgun = require("mailgun-js")({
+  apiKey: process.env.MAILGUN_KEY,
+  domain: "mg.hostero.eu",
+});
 
+const TEMPERATURE_THRESHOLD = process.env.TEMPERATURE_THRESHOLD
+  ? parseInt(process.env.TEMPERATURE_THRESHOLD)
+  : 40;
 const port = process.env.PORT || 8080;
 let db;
 
@@ -59,6 +66,18 @@ http
           console.log(err);
         }
       });
+
+      if (data.temperature >= TEMPERATURE_THRESHOLD) {
+        mailgun
+          .messages()
+          .send({
+            from: "Hostero <no-reply@mg.hostero.eu>",
+            to: "morion4000@gmail.com",
+            subject: `[ALERT] Home rack temperature high`,
+            text: `The temperature in the home rack is too high: ${data.temperature} °C`,
+          })
+          .catch(console.error);
+      }
 
       res.write("Logged");
       res.end();
