@@ -12,6 +12,7 @@ const TEMPERATURE_THRESHOLD = process.env.TEMPERATURE_THRESHOLD
   : 40;
 const port = process.env.PORT || 8080;
 let db;
+let lastEmail = null;
 
 MongoClient.connect(process.env.MONGODB_URL, { useUnifiedTopology: true })
   .then((client) => {
@@ -68,15 +69,21 @@ http
       });
 
       if (data.temperature >= TEMPERATURE_THRESHOLD) {
-        mailgun
-          .messages()
-          .send({
-            from: "Hostero <no-reply@mg.hostero.eu>",
-            to: "morion4000@gmail.com",
-            subject: `[ALERT] Home rack temperature high`,
-            text: `The temperature in the home rack is too high: ${data.temperature} °C`,
-          })
-          .catch(console.error);
+        const now = new Date();
+
+        if (!lastEmail || now - lastEmail >= 60 * 60 * 1000) {
+          mailgun
+            .messages()
+            .send({
+              from: "Hostero <no-reply@mg.hostero.eu>",
+              to: "morion4000@gmail.com",
+              subject: `[ALERT] TEMPERATURE HIGH: ${data.temperature}`,
+              text: `The temperature in the home rack is too high: ${data.temperature} °C`,
+            })
+            .catch(console.error);
+
+          lastEmail = now;
+        }
       }
 
       res.write("Logged");
