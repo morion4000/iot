@@ -48,6 +48,8 @@ http
       data.TVOC = parseInt(q.TVOC);
     }
 
+    console.log(data);
+
     if (Object.keys(q).length === 0) {
       fs.readFile("./index.html", "utf8", (err, data) => {
         if (err) {
@@ -60,8 +62,6 @@ http
         }
       });
     } else {
-      console.log(data);
-
       db.collection("measurements").insertOne(data, (err, result) => {
         if (err) {
           console.log(err);
